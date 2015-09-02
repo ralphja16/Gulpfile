@@ -13,6 +13,7 @@ var gulp 			= require('gulp'),
 	iconfont		= require('gulp-iconfont'),
 	imageop			= require('gulp-image-optimization'),
 	minifyCss		= require('gulp-minify-css');
+var runTimestamp = Math.round(Date.now()/1000);
 
 
 //PATHS TO WATCH
@@ -123,13 +124,15 @@ gulp.task('iconfont', function(){
 	gulp.src(['./public/library/icons/*.svg'])
 		.pipe(iconfont({
 			// Name of the font
-			fontName: 			'stimuliz-icons',
-			appendCodepoints: 	true
+			fontName: 			'rj-icons',
+			appendUnicode: true, // recommended option
+			formats: ['svg', 'ttf', 'eot', 'woff', 'woff2'], // default, 'woff2' and 'svg' are available
+			timestamp: runTimestamp, // recommended to get consistent builds when watching files
 		}))
-		.on('codepoints', function(codepoints, options) {
-	        // CSS templating, e.g.
-	        console.log(codepoints, options);
-	    })
+		.on('glyphs', function(glyphs, options) {
+        // CSS templating, e.g.
+        console.log(glyphs, options);
+      	})
 		.pipe(gulp.dest('./public/library/fonts'));
 });
 
