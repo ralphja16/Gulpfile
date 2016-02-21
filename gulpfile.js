@@ -12,7 +12,11 @@ var gulp 			= require('gulp'),
 	plumber			= require('gulp-plumber'),
 	iconfont		= require('gulp-iconfont'),
 	imageop			= require('gulp-image-optimization'),
-	minifyCss		= require('gulp-minify-css');
+	minifyCss		= require('gulp-minify-css'),
+	postcss 		= require('gulp-postcss'),
+	autoprefixer	= require('autoprefixer'),
+	cssgrace 		= require('cssgrace'),
+	cssnano			= require('gulp-cssnano');
 var runTimestamp = Math.round(Date.now()/1000);
 
 
@@ -31,7 +35,7 @@ var paths = {
 	],
 	vendors: [
 		'./public/library/js/vendor/bootstrap.min.js',
-		'./public/library/js/vendor/jquery.responsivegrid.js'
+		'./public/library/js/vendor/bootstrap-datepicker.js'
 	],
 	images: [
 		'./source/library/img/*'
@@ -41,23 +45,34 @@ var paths = {
 
 //SASS BUILD
 gulp.task('sass', function() {
+	var processors = [
+		autoprefixer({browsers: ['last 2 version', '> 5%', 'ie 8', 'ie 9', 'ios 6', 'android 4']}),
+	];
+
 	gulp.src('./source/sass/main.scss')
+		.pipe(sass().on('error', sass.logError))
+		.pipe(postcss(processors))
+		// .pipe(cssnano())
 		// Initialize sourcemaps
 		.pipe(sourcemaps.init())
 		.pipe(plumber())
-        .pipe(sass())
+        .pipe(sass({outputStyle: 'compressed'}))
         // Write sourcemaps to /library/css/maps
         .pipe(sourcemaps.write('./maps'))
         // CSS destination
         .pipe(gulp.dest('./public/library/css'));
 });
 
+
+
 //SASS DEPLOY
 gulp.task('sass_deploy', function() {
 	gulp.src('./source/sass/main.scss')
 		// Initialize sourcemaps
 		.pipe(sourcemaps.init())
+		// Prevent pipe breaking caused by errors from gulp plugins
 		.pipe(plumber())
+		// Compiles sass to css
         .pipe(sass())
         // Minify CSS
         .pipe(minifyCss({compatibility: 'ie8'}))
@@ -121,10 +136,10 @@ gulp.task('vendors', function(){
 
 //ICONFONT
 gulp.task('iconfont', function(){
-	gulp.src(['./public/library/icons/*.svg'])
+	gulp.src(['./library/icons/*.svg'])
 		.pipe(iconfont({
 			// Name of the font
-			fontName: 			'rj-icons',
+			fontName: 			'ks-icons',
 			appendUnicode: true, // recommended option
 			formats: ['svg', 'ttf', 'eot', 'woff', 'woff2'], // default, 'woff2' and 'svg' are available
 			timestamp: runTimestamp, // recommended to get consistent builds when watching files
@@ -150,11 +165,11 @@ gulp.task('images', function(){
 //BROWSER SYNC
 gulp.task('browser-sync', function() {
     browserSync.init({
-        server: {
-            baseDir: "./"
-        }
+        // server: {
+        //     baseDir: "./"
+        // }
 
-        // proxy: "http://stimuliz:8888"
+        proxy: "http://example:8888"
 
     });
 
